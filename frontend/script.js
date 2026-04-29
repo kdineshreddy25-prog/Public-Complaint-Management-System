@@ -1,7 +1,7 @@
 // Smart Grievance Redressal System v6 - Role-Based
 
 const BASE_URL = "https://public-complaint-management-system-2.onrender.com";
-const API = '${BASE_URL}';
+const API = BASE_URL;
 
 let allLoaded = [], sortByPriority = false, editingId = null;
 const PRIO_ORDER = { HIGH: 1, MEDIUM: 2, LOW: 3 };
@@ -136,7 +136,7 @@ async function registerUser(ev) {
     if (!ok) return;
     const btn = document.getElementById('registerBtn'); btn.disabled = true; btn.textContent = 'Creating...';
     try {
-        const r = await postJSON(`${API}/auth/register`, { name, email, password: pw, role, department: role === 'OFFICER' ? dept : null });
+        const r = await postJSON(`${API}/register`, { name, email, password: pw, role, department: role === 'OFFICER' ? dept : null });
         if (r.ok) { showMsg(msg, `✅ Registered! ID: ${r.data.userId}`, 'success'); showToast('Registered! Please login 🎉'); document.getElementById('registerForm').reset(); }
         else showMsg(msg, `❌ ${r.data.message || 'Failed.'}`, 'error');
     } catch { showMsg(msg, '❌ Backend not reachable.', 'error'); }
@@ -154,7 +154,7 @@ async function loginUser(ev) {
     if (!ok) return;
     const btn = document.getElementById('loginBtn'); btn.disabled = true; btn.textContent = 'Signing in...';
     try {
-        const r = await postJSON(`${API}/auth/login`, { email, password: pw });
+        const r = await postJSON(`${API}/login`, { email, password: pw });
         if (r.ok) {
             const d = r.data;
             localStorage.setItem('userId', d.userId);
