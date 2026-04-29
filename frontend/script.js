@@ -1,5 +1,5 @@
 // Smart Grievance Redressal System v6 - Role-Based
-const BASE_URL = "http://localhost:8080";
+const BASE_URL = "http://localhost:8082";
 let allLoaded = [], sortByPriority = false, editingId = null;
 const PRIO_ORDER = { HIGH:1, MEDIUM:2, LOW:3 };
 const CAT_ICON   = { WATER:'💧', ELECTRICITY:'⚡', ROADS:'🛣️', SANITATION:'🗑️', GENERAL:'📋' };
