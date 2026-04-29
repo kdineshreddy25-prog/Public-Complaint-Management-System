@@ -1,7 +1,5 @@
-
-const BASE_URL = "https://public-complaint-management-system-2.onrender.com/api/complaints";
-const API = `${BASE_URL}/api`;
-
+// Smart Grievance Redressal System v6 - Role-Based
+const API = "https://public-complaint-management-system-2.onrender.com";
 let allLoaded = [], sortByPriority = false, editingId = null;
 const PRIO_ORDER = { HIGH: 1, MEDIUM: 2, LOW: 3 };
 const CAT_ICON = { WATER: '💧', ELECTRICITY: '⚡', ROADS: '🛣️', SANITATION: '🗑️', GENERAL: '📋' };
@@ -135,7 +133,7 @@ async function registerUser(ev) {
     if (!ok) return;
     const btn = document.getElementById('registerBtn'); btn.disabled = true; btn.textContent = 'Creating...';
     try {
-        const r = await postJSON(`${API}/auth/register`, { name, email, password: pw, role, department: role === 'OFFICER' ? dept : null });
+        const r = await postJSON(`${API}/register`, { name, email, password: pw, role, department: role === 'OFFICER' ? dept : null });
         if (r.ok) { showMsg(msg, `✅ Registered! ID: ${r.data.userId}`, 'success'); showToast('Registered! Please login 🎉'); document.getElementById('registerForm').reset(); }
         else showMsg(msg, `❌ ${r.data.message || 'Failed.'}`, 'error');
     } catch { showMsg(msg, '❌ Backend not reachable.', 'error'); }
@@ -153,7 +151,7 @@ async function loginUser(ev) {
     if (!ok) return;
     const btn = document.getElementById('loginBtn'); btn.disabled = true; btn.textContent = 'Signing in...';
     try {
-        const r = await postJSON(`${API}/auth/login`, { email, password: pw });
+        const r = await postJSON(`${API}/login`, { email, password: pw });
         if (r.ok) {
             const d = r.data;
             localStorage.setItem('userId', d.userId);
@@ -441,91 +439,24 @@ async function loadProfile() {
 }
 
 // ---------- HELPERS ----------
-function isOverdue(c) {
-    return c.dueDate && new Date(c.dueDate) < new Date() && c.status !== 'RESOLVED';
-}
-
-function val(id) {
-    const e = document.getElementById(id);
-    return e ? e.value.trim() : '';
-}
-
-function fErr(id, msg) {
-    const e = document.getElementById(id);
-    if (e) e.textContent = msg;
-}
-
-function cErr(id) {
-    const e = document.getElementById(id);
-    if (e) e.textContent = '';
-}
-
-function showMsg(el, msg, type) {
-    if (!el) return;
-    el.innerHTML = msg;
-    el.className = `msg-box msg-${type}`;
-    el.classList.remove('hidden');
-}
-
+function isOverdue(c) { return c.dueDate && new Date(c.dueDate) < new Date() && c.status !== 'RESOLVED'; }
+function val(id) { const e = document.getElementById(id); return e ? e.value.trim() : ''; }
+function fErr(id, msg) { const e = document.getElementById(id); if (e) e.textContent = msg; }
+function cErr(id) { const e = document.getElementById(id); if (e) e.textContent = ''; }
+function showMsg(el, msg, type) { el.innerHTML = msg; el.className = `msg-box msg-${type}`; el.classList.remove('hidden'); }
 function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
-    if (!t) return;
-    t.textContent = msg;
-    t.className = `toast toast-${type}`;
-    t.classList.remove('hidden');
-    clearTimeout(t._t);
-    t._t = setTimeout(() => t.classList.add('hidden'), 3500);
+    t.textContent = msg; t.className = `toast toast-${type}`; t.classList.remove('hidden');
+    clearTimeout(t._t); t._t = setTimeout(() => t.classList.add('hidden'), 3500);
 }
+function escHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+function escAttr(s) { return (s || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;').replace(/\n/g, ' '); }
+function loadingHTML() { return '<div class="loading-state"><span style="font-size:2rem">⏳</span><p>Loading...</p></div>'; }
+function emptyHTML(m) { return `<div class="empty-state"><span class="empty-icon">📭</span><p>${m}</p></div>`; }
 
-function escHtml(s) {
-    const d = document.createElement('div');
-    d.textContent = s || '';
-    return d.innerHTML;
-}
-
-function escAttr(s) {
-    return (s || '')
-        .replace(/\\/g, '\\\\')
-        .replace(/'/g, "\\'")
-        .replace(/"/g, '&quot;')
-        .replace(/\n/g, ' ');
-}
-
-function loadingHTML() {
-    return '<div class="loading-state"><span style="font-size:2rem">⏳</span><p>Loading...</p></div>';
-}
-
-function emptyHTML(m) {
-    return `<div class="empty-state"><span class="empty-icon">📭</span><p>${m}</p></div>`;
-}
-
-// ---------- API HELPERS ----------
-async function getJSON(url) {
-    const r = await fetch(url);
-    if (!r.ok) throw new Error('Request failed');
-    return r.json();
-}
-
-async function postJSON(url, body) {
-    const r = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-    });
-    const data = await r.json();
-    return { ok: r.ok, data };
-}
-
-async function putJSON(url, body) {
-    const r = await fetch(url, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-    });
-    const data = await r.json();
-    return { ok: r.ok, data };
-}
-
+async function getJSON(url) { const r = await fetch(url); if (!r.ok) throw new Error('Request failed'); return r.json(); }
+async function postJSON(url, body) { const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); const data = await r.json(); return { ok: r.ok, data }; }
+async function putJSON(url, body) { const r = await fetch(url, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); const data = await r.json(); return { ok: r.ok, data }; }
 
 // ---------- INIT ----------
 (function init() {
